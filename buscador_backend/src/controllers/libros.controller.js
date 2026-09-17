@@ -12,4 +12,16 @@ function buscar(req, res) {
   res.json(resultados);
 }
 
-module.exports = { buscar };
+function buscarPorCategoria(req, res) {
+  const nombre = req.query.nombre;
+
+  if (!nombre) {
+    return res.json([]);
+  }
+
+  const resultados = librosService.buscarPorCategoria(nombre);
+
+  res.json(resultados);
+}
+
+module.exports = { buscar, buscarPorCategoria };

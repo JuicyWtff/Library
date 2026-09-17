@@ -4,13 +4,16 @@ function ListaResultados({ resultados }) {
   }
 
   return (
-    <ul>
+    <div className="cuadricula-libros">
       {resultados.map((libro) => (
-        <li key={libro.isbn}>
-          <strong>{libro.titulo}</strong> — {libro.autor} ({libro.anio})
-        </li>
+        <div key={libro.isbn} className="tarjeta-libro">
+          <span className="etiqueta-categoria">{libro.categoria}</span>
+          <img src={libro.imagen} alt={libro.titulo} className="portada-libro" />
+          <p className="titulo-libro">{libro.titulo}</p>
+          <p className="autor-libro">{libro.autor}</p>
+        </div>
       ))}
-    </ul>
+    </div>
   );
 }
 
