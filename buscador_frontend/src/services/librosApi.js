@@ -6,4 +6,10 @@ async function buscarLibros(texto) {
   return datos;
 }
 
-export { buscarLibros };
+async function buscarPorCategoria(categoria) {
+  const respuesta = await fetch(`${URL_BASE}/categoria?nombre=${categoria}`);
+  const datos = await respuesta.json();
+  return datos;
+}
+
+export { buscarLibros, buscarPorCategoria };

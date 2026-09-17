@@ -3,8 +3,8 @@ import './App.css';
 
 function App() {
   return (
-    <div style={{ padding: '2rem', fontFamily: 'sans-serif' }}>
-      <h1>Library</h1>
+    <div className="contenedor-principal">
+      <h1 className="titulo-books">BOOKS</h1>
       <Buscador />
     </div>
   );
