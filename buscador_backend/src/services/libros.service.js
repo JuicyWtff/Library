@@ -20,27 +20,45 @@ function obtenerTerminosBusqueda(texto) {
   return [texto];
 }
 
-function buscarPorTituloYCategorias(terminos) {
-  const stmtTitulo = db.prepare(`
+function buscarIsbnsPorPrefijo(prefijo) {
+  const stmt = db.prepare(`
+    SELECT DISTINCT isbn FROM indice WHERE palabra LIKE ? LIMIT 10
+  `);
+  return stmt.all(prefijo.toLowerCase() + '%').map((fila) => fila.isbn);
+}
+
+function buscarIsbnsPorPalabraExacta(palabra) {
+  const stmt = db.prepare(`
+    SELECT DISTINCT isbn FROM indice WHERE palabra = ? LIMIT 10
+  `);
+  return stmt.all(palabra.toLowerCase()).map((fila) => fila.isbn);
+}
+
+function obtenerLibrosPorIsbns(isbns) {
+  if (isbns.length === 0) {
+    return [];
+  }
+  const placeholders = isbns.map(() => '?').join(',');
+  const stmt = db.prepare(`
     SELECT isbn, titulo, autor, anio, editorial, categoria, imagen
     FROM libros
-    WHERE titulo LIKE ?
-    LIMIT 10
+    WHERE isbn IN (${placeholders})
   `);
+  return stmt.all(...isbns);
+}
 
-  const stmtCategoria = db.prepare(`
-    SELECT isbn, titulo, autor, anio, editorial, categoria, imagen
-    FROM libros
-    WHERE categoria = ?
-    LIMIT 10
-  `);
-
+function buscarPorTituloYCategorias(terminos, esOriginal) {
   const isbnsExistentes = new Set();
-  const combinados = [];
+  let combinados = [];
 
   for (const termino of terminos) {
-    const resultadosTitulo = stmtTitulo.all(termino + '%');
-    for (const libro of resultadosTitulo) {
+    const isbns = esOriginal
+      ? buscarIsbnsPorPrefijo(termino)
+      : buscarIsbnsPorPalabraExacta(termino);
+
+    const libros = obtenerLibrosPorIsbns(isbns);
+
+    for (const libro of libros) {
       if (!isbnsExistentes.has(libro.isbn)) {
         isbnsExistentes.add(libro.isbn);
         combinados.push(libro);
@@ -49,6 +67,12 @@ function buscarPorTituloYCategorias(terminos) {
 
     const categoriaEncontrada = encontrarCategoriaPorPalabra(termino);
     if (categoriaEncontrada) {
+      const stmtCategoria = db.prepare(`
+        SELECT isbn, titulo, autor, anio, editorial, categoria, imagen
+        FROM libros
+        WHERE categoria = ?
+        LIMIT 10
+      `);
       const resultadosCategoria = stmtCategoria.all(categoriaEncontrada);
       for (const libro of resultadosCategoria) {
         if (!isbnsExistentes.has(libro.isbn)) {
@@ -63,8 +87,10 @@ function buscarPorTituloYCategorias(terminos) {
 }
 
 function buscarPorTitulo(texto) {
+  const textoLower = texto.toLowerCase();
+  const esOriginal = !diccionarioIdiomas[textoLower];
   const terminos = obtenerTerminosBusqueda(texto);
-  return buscarPorTituloYCategorias(terminos);
+  return buscarPorTituloYCategorias(terminos, esOriginal);
 }
 
 function buscarPorCategoria(categoria) {
@@ -74,7 +100,6 @@ function buscarPorCategoria(categoria) {
     WHERE categoria = ?
     LIMIT 20
   `);
-
   return stmt.all(categoria);
 }
 
