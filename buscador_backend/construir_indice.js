@@ -1,4 +1,6 @@
 const Database = require('better-sqlite3');
+const stopwords = require('./src/data/stopwords');
+const lematizar = require('./src/utils/lematizar');
 
 const db = new Database('books.db');
 
@@ -13,7 +15,9 @@ const insertar = db.prepare("INSERT INTO indice (palabra, isbn) VALUES (?, ?)");
 function tokenizar(titulo) {
   const limpio = titulo.toLowerCase().replace(/[^a-z0-9\s]/g, '');
   const palabras = limpio.split(/\s+/).filter((p) => p.length > 0);
-  return [...new Set(palabras)];
+  const sinVacias = palabras.filter((p) => !stopwords.includes(p));
+  const lematizadas = sinVacias.map((p) => lematizar(p));
+  return [...new Set(lematizadas)];
 }
 
 const indexarTodos = db.transaction((libros) => {
@@ -29,7 +33,7 @@ indexarTodos(libros);
 
 db.exec("CREATE INDEX idx_palabra ON indice(palabra)");
 
-console.log("¡Listo! Índice construido.");
+console.log("Índice construido.");
 
 const totalPalabras = db.prepare("SELECT COUNT(DISTINCT palabra) as total FROM indice").get();
 console.log(`Palabras únicas en el vocabulario: ${totalPalabras.total}`);
