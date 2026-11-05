@@ -12,4 +12,12 @@ async function buscarPorCategoria(categoria) {
   return datos;
 }
 
-export { buscarLibros, buscarPorCategoria };
+async function obtenerEstadisticas() {
+  const respuesta = await fetch(`${URL_BASE}/estadisticas`);
+  if (!respuesta.ok) {
+    throw new Error('No se pudieron cargar las estadísticas');
+  }
+  return respuesta.json();
+}
+
+export { buscarLibros, buscarPorCategoria, obtenerEstadisticas };
