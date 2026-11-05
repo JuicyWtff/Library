@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import Buscador from './components/Buscador';
+import Biblioteca from './components/Biblioteca';
 import Estadisticas from './components/Estadisticas';
 import './App.css';
 
@@ -18,6 +19,12 @@ function App() {
           Buscador
         </button>
         <button
+          className={`pestana ${pestana === 'biblioteca' ? 'activa' : ''}`}
+          onClick={() => setPestana('biblioteca')}
+        >
+          Mi biblioteca
+        </button>
+        <button
           className={`pestana ${pestana === 'estadisticas' ? 'activa' : ''}`}
           onClick={() => setPestana('estadisticas')}
         >
@@ -29,6 +36,7 @@ function App() {
         <Buscador />
       </div>
 
+      {pestana === 'biblioteca' && <Biblioteca />}
       {pestana === 'estadisticas' && <Estadisticas />}
     </div>
   );
