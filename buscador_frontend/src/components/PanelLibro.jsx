@@ -127,7 +127,7 @@ function PanelLibro({ libro, onCerrar, onGuardado }) {
           <div className="panel-datos">
             <h2 className="panel-titulo">{libro.titulo}</h2>
             <p className="panel-autor">{libro.autor}</p>
-            {libro.categoria && <span className="etiqueta-categoria">{libro.categoria}</span>}
+            {libro.categoria && libro.categoria !== 'Unclassified' && <span className="panel-categoria">{libro.categoria}</span>}
             <div className="panel-promedio">
               {resumen && resumen.total > 0 ? (
                 <>

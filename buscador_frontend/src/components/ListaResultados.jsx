@@ -3,6 +3,7 @@ import { obtenerResumenes } from '../services/librosApi';
 import Estrellas from './Estrellas';
 import PanelLibro from './PanelLibro';
 import './Calificaciones.css';
+import './Buscador.css';
 
 function ListaResultados({ resultados }) {
   const [resumenes, setResumenes] = useState({});
@@ -33,13 +34,14 @@ function ListaResultados({ resultados }) {
 
   return (
     <>
-      <div className="cuadricula-libros">
+      <div className="cuadricula-resultados">
         {resultados.map((libro) => {
           const resumen = resumenes[libro.isbn];
+          const conCategoria = libro.categoria && libro.categoria !== 'Unclassified';
           return (
             <div
               key={libro.isbn}
-              className="tarjeta-libro tarjeta-clicable"
+              className="tarjeta-fila"
               role="button"
               tabIndex={0}
               onClick={() => setLibroAbierto(libro)}
@@ -47,14 +49,18 @@ function ListaResultados({ resultados }) {
                 if (evento.key === 'Enter') setLibroAbierto(libro);
               }}
             >
-              <span className="etiqueta-categoria">{libro.categoria}</span>
-              <img src={libro.imagen} alt={libro.titulo} className="portada-libro" />
-              <p className="titulo-libro">{libro.titulo}</p>
-              <p className="autor-libro">{libro.autor}</p>
+              <div className="portada-envoltura">
+                {conCategoria && <span className="etiqueta-categoria">{libro.categoria}</span>}
+                <img src={libro.imagen} alt={libro.titulo} className="portada-fila" />
+              </div>
+              <p className="titulo-fila" title={libro.titulo}>
+                {libro.titulo}
+              </p>
+              <p className="autor-fila">{libro.autor}</p>
               <div className="calificacion-tarjeta">
                 {resumen && resumen.total > 0 ? (
                   <>
-                    <Estrellas valor={resumen.promedio} tamano="0.95rem" />
+                    <Estrellas valor={resumen.promedio} tamano="0.85rem" />
                     <span className="texto-calificacion">
                       {resumen.promedio} ({resumen.total})
                     </span>

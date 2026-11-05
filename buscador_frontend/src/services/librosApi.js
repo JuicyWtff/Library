@@ -61,6 +61,10 @@ async function obtenerResenas(isbn) {
   return pedir(`/resenas/${encodeURIComponent(isbn)}`);
 }
 
+async function obtenerExplorar() {
+  return pedir('/explorar');
+}
+
 export {
   buscarLibros,
   buscarPorCategoria,
@@ -70,5 +74,6 @@ export {
   obtenerEntrada,
   guardarEntrada,
   eliminarEntrada,
-  obtenerResenas
+  obtenerResenas,
+  obtenerExplorar
 };
