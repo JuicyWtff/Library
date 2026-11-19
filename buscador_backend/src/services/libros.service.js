@@ -221,4 +221,4 @@ function buscarPorCategoria(categoria) {
   return stmt.all(categoria);
 }
 
-module.exports = { buscarPorTitulo, buscarPorCoseno, buscarPorCategoria };
+module.exports = { buscarPorTitulo, buscarPorCoseno, buscarPorCategoria, obtenerVotosPorIsbn };

@@ -122,6 +122,38 @@ function construirSecciones() {
   return secciones;
 }
 
+function obtenerFichas(isbns) {
+  if (isbns.length === 0) {
+    return [];
+  }
+  const marcas = isbns.map(() => '?').join(',');
+  const filas = db
+    .prepare(
+      `SELECT l.isbn, l.titulo, l.autor, l.imagen, l.categoria,
+              r.votos, r.promedio, r.lecturas
+       FROM libros l
+       LEFT JOIN (
+         SELECT isbn,
+                COUNT(estrellas) AS votos,
+                AVG(estrellas) AS promedio,
+                SUM(lectura) AS lecturas
+         FROM (${consultaVotos()})
+         WHERE isbn IN (${marcas})
+         GROUP BY isbn
+       ) r ON r.isbn = l.isbn
+       WHERE l.isbn IN (${marcas})`
+    )
+    .all(...isbns, ...isbns);
+
+  const porIsbn = new Map(
+    filas.map((fila) => [
+      fila.isbn,
+      formatear({ ...fila, votos: fila.votos || 0, lecturas: fila.lecturas || 0 })
+    ])
+  );
+  return isbns.filter((isbn) => porIsbn.has(isbn)).map((isbn) => porIsbn.get(isbn));
+}
+
 function obtenerExplorar(forzar) {
   const vigente = cache && Date.now() - construidoEn < VIGENCIA_MS;
   if (!forzar && vigente) {
@@ -132,4 +164,4 @@ function obtenerExplorar(forzar) {
   return cache;
 }
 
-module.exports = { obtenerExplorar };
+module.exports = { obtenerExplorar, obtenerFichas };
