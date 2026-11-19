@@ -12,6 +12,18 @@ function buscar(req, res) {
   res.json(resultados);
 }
 
+function buscarRelevancia(req, res) {
+  const q = req.query.q;
+
+  if (!q || q.trim() === '') {
+    return res.json([]);
+  }
+
+  const resultados = librosService.buscarPorCoseno(q);
+
+  res.json(resultados);
+}
+
 function buscarPorCategoria(req, res) {
   const nombre = req.query.nombre;
 
@@ -24,4 +36,4 @@ function buscarPorCategoria(req, res) {
   res.json(resultados);
 }
 
-module.exports = { buscar, buscarPorCategoria };
+module.exports = { buscar, buscarRelevancia, buscarPorCategoria };
