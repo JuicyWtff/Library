@@ -164,6 +164,10 @@ function elegirPerfil(token, cuentaId, perfilId, pin) {
   return perfilPublico(perfil);
 }
 
+function salirDePerfil(token) {
+  db.prepare('UPDATE sesiones SET perfil_id = NULL WHERE token = ?').run(token);
+}
+
 function listarPerfiles(cuentaId) {
   return db
     .prepare('SELECT * FROM perfiles WHERE cuenta_id = ? ORDER BY id')
@@ -234,6 +238,7 @@ module.exports = {
   cerrarSesion,
   obtenerPerfilActivo,
   elegirPerfil,
+  salirDePerfil,
   listarPerfiles,
   crearPerfil,
   actualizarPerfil,

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { obtenerExplorar } from '../services/librosApi';
+import { obtenerExplorar, obtenerParaTi } from '../services/librosApi';
 import FilaLibros from './FilaLibros';
 import PanelLibro from './PanelLibro';
 import './Explorar.css';
@@ -12,10 +12,10 @@ function Explorar() {
 
   useEffect(() => {
     let activo = true;
-    obtenerExplorar()
-      .then((datos) => {
+    Promise.all([obtenerParaTi().catch(() => ({ secciones: [] })), obtenerExplorar()])
+      .then(([paraTi, explorar]) => {
         if (!activo) return;
-        setSecciones(datos.secciones);
+        setSecciones([...paraTi.secciones, ...explorar.secciones]);
         setCargando(false);
       })
       .catch(() => {

@@ -7,6 +7,7 @@ const router = express.Router();
 router.post('/auth/registro', controlador.registro);
 router.post('/auth/login', controlador.login);
 router.post('/auth/logout', controlador.logout);
+router.post('/auth/salir-perfil', requiereSesion, controlador.salirDePerfil);
 router.get('/auth/yo', requiereSesion, controlador.yo);
 
 router.get('/perfiles', requiereSesion, controlador.listarPerfiles);

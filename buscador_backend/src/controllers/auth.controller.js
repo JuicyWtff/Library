@@ -142,8 +142,18 @@ function entrarAPerfil(req, res) {
   }
 }
 
+function salirDePerfil(req, res) {
+  try {
+    servicio.salirDePerfil(req.token);
+    res.json({ ok: true });
+  } catch (err) {
+    responderError(res, err);
+  }
+}
+
 module.exports = {
   registro,
+  salirDePerfil,
   login,
   logout,
   yo,
