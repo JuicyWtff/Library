@@ -1,59 +1,59 @@
-import { useState } from 'react';
-import { buscarLibros, buscarPorCategoria } from '../services/librosApi';
-import ListaResultados from './ListaResultados';
+import './Buscador.css';
 
 const categorias = [
-  "Fantasy", "Mystery", "Romance", "Horror",
-  "Science Fiction", "Children", "Biography/Non-fiction", "Adventure"
+  'Fantasy',
+  'Mystery',
+  'Romance',
+  'Horror',
+  'Science Fiction',
+  'Children',
+  'Biography/Non-fiction',
+  'Adventure'
 ];
 
-function Buscador() {
-  const [texto, setTexto] = useState('');
-  const [resultados, setResultados] = useState([]);
-  const [categoriaActiva, setCategoriaActiva] = useState(null);
-
-  const manejarCambio = async (valor) => {
-    setTexto(valor);
-    setCategoriaActiva(null);
-
-    if (valor.trim() === '') {
-      setResultados([]);
-      return;
-    }
-
-    const datos = await buscarLibros(valor);
-    setResultados(datos);
-  };
-
-  const manejarCategoria = async (categoria) => {
-    setTexto('');
-    setCategoriaActiva(categoria);
-    const datos = await buscarPorCategoria(categoria);
-    setResultados(datos);
-  };
-
-  const limpiar = () => {
-    setTexto('');
-    setCategoriaActiva(null);
-    setResultados([]);
-  };
+function Buscador({ texto, categoriaActiva, onTexto, onCategoria, onLimpiar }) {
+  const hayBusqueda = texto.length > 0 || categoriaActiva !== null;
 
   return (
-    <div>
-      <div className="barra-busqueda">
+    <div className="buscador-superior">
+      <div className="campo-busqueda">
+        <svg
+          className="icono-busqueda"
+          width="18"
+          height="18"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
+          <circle cx="11" cy="11" r="7" />
+          <line x1="21" y1="21" x2="16.65" y2="16.65" />
+        </svg>
         <input
           type="text"
-          className="input-busqueda"
-          placeholder="Escribe el título de un libro..."
           value={texto}
-          onChange={(e) => manejarCambio(e.target.value)}
+          placeholder="Busca un libro"
+          onChange={(evento) => onTexto(evento.target.value)}
         />
-        <button className="boton-limpiar" onClick={limpiar} aria-label="Limpiar búsqueda">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <line x1="18" y1="6" x2="6" y2="18" />
-            <line x1="6" y1="6" x2="18" y2="18" />
-          </svg>
-        </button>
+        {hayBusqueda && (
+          <button className="boton-limpiar" onClick={onLimpiar} aria-label="Limpiar búsqueda">
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <line x1="18" y1="6" x2="6" y2="18" />
+              <line x1="6" y1="6" x2="18" y2="18" />
+            </svg>
+          </button>
+        )}
       </div>
 
       <div className="fila-categorias">
@@ -61,14 +61,12 @@ function Buscador() {
           <button
             key={categoria}
             className={`pildora-categoria ${categoriaActiva === categoria ? 'activa' : ''}`}
-            onClick={() => manejarCategoria(categoria)}
+            onClick={() => onCategoria(categoria)}
           >
             {categoria}
           </button>
         ))}
       </div>
-
-      <ListaResultados resultados={resultados} />
     </div>
   );
 }
