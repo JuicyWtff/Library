@@ -11,7 +11,7 @@ const categorias = [
   'Adventure'
 ];
 
-function Buscador({ texto, categoriaActiva, onTexto, onCategoria, onLimpiar }) {
+function Buscador({ texto, categoriaActiva, onTexto, onBuscar, onCategoria, onLimpiar }) {
   const hayBusqueda = texto.length > 0 || categoriaActiva !== null;
 
   return (
@@ -34,8 +34,12 @@ function Buscador({ texto, categoriaActiva, onTexto, onCategoria, onLimpiar }) {
         <input
           type="text"
           value={texto}
-          placeholder="Busca un libro"
+          placeholder="Busca un libro por título"
+          aria-label="Buscar un libro por título"
           onChange={(evento) => onTexto(evento.target.value)}
+          onKeyDown={(evento) => {
+            if (evento.key === 'Enter') onBuscar();
+          }}
         />
         {hayBusqueda && (
           <button className="boton-limpiar" onClick={onLimpiar} aria-label="Limpiar búsqueda">
@@ -61,6 +65,7 @@ function Buscador({ texto, categoriaActiva, onTexto, onCategoria, onLimpiar }) {
           <button
             key={categoria}
             className={`pildora-categoria ${categoriaActiva === categoria ? 'activa' : ''}`}
+            aria-pressed={categoriaActiva === categoria}
             onClick={() => onCategoria(categoria)}
           >
             {categoria}

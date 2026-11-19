@@ -1,0 +1,3 @@
+const USUARIO_PRUEBA_MIGRADO = 999999;
+
+module.exports = { USUARIO_PRUEBA_MIGRADO };

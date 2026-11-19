@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { obtenerBiblioteca } from '../services/librosApi';
 import Estrellas from './Estrellas';
 import PanelLibro from './PanelLibro';
+import EsqueletoLibros from './EsqueletoLibros';
 import './Calificaciones.css';
 
 const FILTROS = [
@@ -49,7 +50,7 @@ function Biblioteca() {
   }
 
   if (cargando) {
-    return <p className="texto-calificacion">Cargando...</p>;
+    return <EsqueletoLibros cantidad={5} />;
   }
 
   return (
@@ -67,13 +68,13 @@ function Biblioteca() {
         ))}
       </div>
 
-      {error && <p className="texto-calificacion">{error}</p>}
+      {error && <p className="mensaje-busqueda error">{error}. Recarga la página e inténtalo de nuevo.</p>}
 
       {!error && visibles.length === 0 && (
-        <p className="texto-calificacion">
+        <p className="mensaje-busqueda">
           {libros.length === 0
-            ? 'Todavía no has agregado libros. Búscalos y ábrelos para calificarlos.'
-            : 'No hay libros con ese estado.'}
+            ? 'Aún no tienes libros. Busca uno, ábrelo y márcalo como leído, leyendo o pendiente.'
+            : 'No tienes libros con este estado. Prueba con otro filtro.'}
         </p>
       )}
 

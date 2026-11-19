@@ -21,7 +21,7 @@ function resumenes(req, res) {
 
 function listarBiblioteca(req, res) {
   try {
-    res.json(servicio.listarBiblioteca());
+    res.json(servicio.listarBiblioteca(req.perfil.id));
   } catch (err) {
     responderError(res, err);
   }
@@ -29,7 +29,7 @@ function listarBiblioteca(req, res) {
 
 function obtenerEntrada(req, res) {
   try {
-    const entrada = servicio.obtenerEntrada(req.params.isbn);
+    const entrada = servicio.obtenerEntrada(req.perfil.id, req.params.isbn);
     res.json(entrada);
   } catch (err) {
     responderError(res, err);
@@ -43,7 +43,7 @@ function guardarEntrada(req, res) {
     if ('estado' in cuerpo) datos.estado = cuerpo.estado;
     if ('estrellas' in cuerpo) datos.estrellas = cuerpo.estrellas;
     if ('resena' in cuerpo) datos.resena = cuerpo.resena;
-    res.json(servicio.guardarEntrada(req.params.isbn, datos));
+    res.json(servicio.guardarEntrada(req.perfil.id, req.params.isbn, datos));
   } catch (err) {
     responderError(res, err);
   }
@@ -51,7 +51,7 @@ function guardarEntrada(req, res) {
 
 function eliminarEntrada(req, res) {
   try {
-    servicio.eliminarEntrada(req.params.isbn);
+    servicio.eliminarEntrada(req.perfil.id, req.params.isbn);
     res.json({ ok: true });
   } catch (err) {
     responderError(res, err);
@@ -60,7 +60,7 @@ function eliminarEntrada(req, res) {
 
 function listarResenas(req, res) {
   try {
-    res.json(servicio.listarResenas(req.params.isbn));
+    res.json(servicio.listarResenas(req.perfil.id, req.params.isbn));
   } catch (err) {
     responderError(res, err);
   }

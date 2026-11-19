@@ -1,4 +1,5 @@
 const estadisticasService = require('../services/estadisticas.service');
+const estadisticasPerfilesService = require('../services/estadisticasPerfiles.service');
 
 function obtener(req, res) {
   const datos = estadisticasService.obtenerEstadisticas();
@@ -10,4 +11,12 @@ function obtener(req, res) {
   res.json(datos);
 }
 
-module.exports = { obtener };
+function obtenerDePerfiles(req, res) {
+  if (req.perfil.es_dueno !== 1) {
+    return res.status(403).json({ error: 'Solo el dueño de la cuenta puede ver esto' });
+  }
+
+  res.json(estadisticasPerfilesService.obtenerEstadisticasPerfiles(req.cuenta.id));
+}
+
+module.exports = { obtener, obtenerDePerfiles };

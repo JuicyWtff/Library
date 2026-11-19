@@ -1,5 +1,6 @@
 const path = require('path');
 const Database = require('better-sqlite3');
+const { consultaVotos } = require('./calificaciones.service');
 
 const db = new Database(path.join(__dirname, '..', '..', 'books.db'));
 
@@ -18,10 +19,10 @@ function reconstruirResumen() {
     CREATE TEMP TABLE resumen_libros AS
     SELECT
       isbn,
-      SUM(CASE WHEN calificacion > 0 THEN 1 ELSE 0 END) AS votos,
-      AVG(CASE WHEN calificacion > 0 THEN calificacion END) AS promedio,
-      COUNT(*) AS lecturas
-    FROM calificaciones
+      COUNT(estrellas) AS votos,
+      AVG(estrellas) AS promedio,
+      SUM(lectura) AS lecturas
+    FROM (${consultaVotos()})
     GROUP BY isbn;
     CREATE INDEX temp.idx_resumen_isbn ON resumen_libros(isbn);
   `);
@@ -29,7 +30,7 @@ function reconstruirResumen() {
 
 function promedioGlobal() {
   const fila = db
-    .prepare('SELECT AVG(calificacion) AS promedio FROM calificaciones WHERE calificacion > 0')
+    .prepare(`SELECT AVG(estrellas) AS promedio FROM (${consultaVotos()})`)
     .get();
   return fila.promedio || 0;
 }
@@ -41,7 +42,7 @@ function formatear(fila) {
     autor: fila.autor,
     imagen: fila.imagen,
     categoria: fila.categoria,
-    promedio: fila.promedio === null ? null : Math.round((fila.promedio / 2) * 10) / 10,
+    promedio: fila.promedio === null ? null : Math.round(fila.promedio * 10) / 10,
     votos: fila.votos,
     lecturas: fila.lecturas
   };
@@ -121,6 +122,38 @@ function construirSecciones() {
   return secciones;
 }
 
+function obtenerFichas(isbns) {
+  if (isbns.length === 0) {
+    return [];
+  }
+  const marcas = isbns.map(() => '?').join(',');
+  const filas = db
+    .prepare(
+      `SELECT l.isbn, l.titulo, l.autor, l.imagen, l.categoria,
+              r.votos, r.promedio, r.lecturas
+       FROM libros l
+       LEFT JOIN (
+         SELECT isbn,
+                COUNT(estrellas) AS votos,
+                AVG(estrellas) AS promedio,
+                SUM(lectura) AS lecturas
+         FROM (${consultaVotos()})
+         WHERE isbn IN (${marcas})
+         GROUP BY isbn
+       ) r ON r.isbn = l.isbn
+       WHERE l.isbn IN (${marcas})`
+    )
+    .all(...isbns, ...isbns);
+
+  const porIsbn = new Map(
+    filas.map((fila) => [
+      fila.isbn,
+      formatear({ ...fila, votos: fila.votos || 0, lecturas: fila.lecturas || 0 })
+    ])
+  );
+  return isbns.filter((isbn) => porIsbn.has(isbn)).map((isbn) => porIsbn.get(isbn));
+}
+
 function obtenerExplorar(forzar) {
   const vigente = cache && Date.now() - construidoEn < VIGENCIA_MS;
   if (!forzar && vigente) {
@@ -131,4 +164,4 @@ function obtenerExplorar(forzar) {
   return cache;
 }
 
-module.exports = { obtenerExplorar };
+module.exports = { obtenerExplorar, obtenerFichas };
