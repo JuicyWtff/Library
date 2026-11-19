@@ -227,6 +227,45 @@ body {
   font-size: 0.9rem;
 }
 
+.seccion-perfiles-cuenta h2 {
+  font-family: 'Playfair Display', serif;
+}
+
+.tarjeta-perfil-cuenta {
+  border-left: 6px solid var(--accent);
+}
+
+.cabecera-perfil-cuenta {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.cabecera-perfil-cuenta h3 {
+  font-family: 'Playfair Display', serif;
+  margin: 0;
+}
+
+.cuerpo-perfil-cuenta {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 1.5rem;
+}
+
+.cuerpo-perfil-cuenta h4 {
+  margin: 1rem 0 0.4rem;
+}
+
+.mensaje-perfil-cuenta {
+  color: var(--texto-tenue);
+}
+
+.promedio-perfil-cuenta {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.4rem;
+  margin: 0;
+}
+
 .tabla-top th,
 .tabla-top td {
   text-align: left;

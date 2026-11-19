@@ -64,6 +64,10 @@ async function obtenerEstadisticas() {
   return pedir('/estadisticas');
 }
 
+async function obtenerEstadisticasPerfiles() {
+  return pedir('/estadisticas-perfiles');
+}
+
 async function obtenerResumenes(isbns) {
   if (isbns.length === 0) {
     return {};
@@ -146,6 +150,7 @@ export {
   buscarPorRelevancia,
   buscarPorCategoria,
   obtenerEstadisticas,
+  obtenerEstadisticasPerfiles,
   obtenerResumenes,
   obtenerBiblioteca,
   obtenerEntrada,

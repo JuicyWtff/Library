@@ -3,10 +3,13 @@ import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer
 } from 'recharts';
 import { obtenerEstadisticas } from '../services/librosApi';
+import useSesion from '../context/useSesion';
+import PerfilesCuenta from './PerfilesCuenta';
 
 const formato = (valor) => Number(valor).toLocaleString('es-MX');
 
 function Estadisticas() {
+  const { perfil } = useSesion();
   const [datos, setDatos] = useState(null);
   const [error, setError] = useState(false);
 
@@ -124,6 +127,8 @@ function Estadisticas() {
           </LineChart>
         </ResponsiveContainer>
       </div>
+
+      {perfil.es_dueno && <PerfilesCuenta />}
     </div>
   );
 }
