@@ -3,7 +3,7 @@ const arbol = require('../services/arbol.service');
 
 function paraTi(req, res) {
   try {
-    res.json(recomendaciones.obtenerParaTi());
+    res.json(recomendaciones.obtenerParaTi(req.perfil.id));
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: 'No se pudieron armar las recomendaciones' });

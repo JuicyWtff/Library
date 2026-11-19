@@ -1,11 +1,11 @@
 const path = require('path');
 const bcrypt = require('bcrypt');
 const Database = require('better-sqlite3');
+const { USUARIO_PRUEBA_MIGRADO } = require('./src/data/usuarioPruebaMigrado');
 
 const CORREO_PRUEBA = 'hugobyjavier999@gmail.com';
 const NOMBRE_PERFIL = 'Hugo';
 const COLOR_PERFIL = '#d98e5f';
-const USUARIO_DATASET = 999999;
 const COSTO_BCRYPT = 10;
 
 const contrasena = process.argv[2];
@@ -52,6 +52,8 @@ db.exec(`
     fecha TEXT NOT NULL,
     PRIMARY KEY (perfil_id, isbn)
   );
+
+  CREATE INDEX IF NOT EXISTS idx_perfil_biblioteca_isbn ON perfil_biblioteca(isbn);
 `);
 
 function existeTabla(nombre) {
@@ -93,7 +95,7 @@ function obtenerOCrearPerfil(cuentaId) {
 function migrarBiblioteca(perfilId) {
   const leidas = db
     .prepare('SELECT COUNT(*) AS total FROM biblioteca WHERE user_id = ?')
-    .get(USUARIO_DATASET).total;
+    .get(USUARIO_PRUEBA_MIGRADO).total;
 
   const insertadas = db
     .prepare(
@@ -106,7 +108,7 @@ function migrarBiblioteca(perfilId) {
        LEFT JOIN calificaciones c ON c.user_id = b.user_id AND c.isbn = b.isbn
        WHERE b.user_id = ?`
     )
-    .run(perfilId, USUARIO_DATASET).changes;
+    .run(perfilId, USUARIO_PRUEBA_MIGRADO).changes;
 
   return { leidas, insertadas };
 }

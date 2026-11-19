@@ -1,6 +1,6 @@
 const path = require('path');
 const Database = require('better-sqlite3');
-const { USUARIO_ACTUAL } = require('./calificaciones.service');
+const { USUARIO_PRUEBA_MIGRADO } = require('../data/usuarioPruebaMigrado');
 const { obtenerArbol, SIN_CLASIFICAR } = require('./arbol.service');
 const { obtenerPuntajes, obtenerFichas } = require('./explorar.service');
 
@@ -18,7 +18,8 @@ const consultaAfines = db.prepare(
    FROM calificaciones c1
    JOIN calificaciones c2 ON c2.user_id = c1.user_id AND c2.isbn != c1.isbn
    WHERE c1.isbn = ?
-     AND c1.user_id != ?
+     AND c1.user_id != ${USUARIO_PRUEBA_MIGRADO}
+     AND c2.user_id != ${USUARIO_PRUEBA_MIGRADO}
      AND c1.calificacion >= ${CALIFICACION_AFIN}
      AND c2.calificacion >= ${CALIFICACION_AFIN}
    GROUP BY c2.isbn
@@ -27,21 +28,15 @@ const consultaAfines = db.prepare(
 );
 
 const consultaBiblioteca = db.prepare(
-  `SELECT b.isbn, b.estado, c.calificacion, l.titulo
-   FROM biblioteca b
+  `SELECT b.isbn, b.estado, b.estrellas, l.titulo
+   FROM perfil_biblioteca b
    JOIN libros l ON l.isbn = b.isbn
-   LEFT JOIN calificaciones c ON c.user_id = b.user_id AND c.isbn = b.isbn
-   WHERE b.user_id = ?
+   WHERE b.perfil_id = ?
    ORDER BY b.fecha DESC`
 );
 
-function leerBiblioteca() {
-  return consultaBiblioteca.all(USUARIO_ACTUAL).map((fila) => ({
-    isbn: fila.isbn,
-    estado: fila.estado,
-    titulo: fila.titulo,
-    estrellas: fila.calificacion > 0 ? fila.calificacion / 2 : null
-  }));
+function leerBiblioteca(perfilId) {
+  return consultaBiblioteca.all(perfilId);
 }
 
 function ordenarPorPuntaje(isbns, puntajes) {
@@ -96,7 +91,7 @@ function recomendarDesdeLibro(semilla, excluidos, arbol, puntajes) {
     agregar(ordenarPorPuntaje(ubicacion.autor.isbns, puntajes), `Rama del autor: ${ubicacion.autor.nombre}`);
   }
 
-  agregar(consultaAfines.all(semilla.isbn, USUARIO_ACTUAL).map((fila) => fila.isbn), 'Lectores afines');
+  agregar(consultaAfines.all(semilla.isbn).map((fila) => fila.isbn), 'Lectores afines');
 
   if (ubicacion && ubicacion.genero.nombre !== SIN_CLASIFICAR) {
     const delGenero = arbol.librosDeGenero(ubicacion.genero);
@@ -159,8 +154,8 @@ function recomendarPorGenero(leidos, excluidos, arbol, puntajes) {
   };
 }
 
-function obtenerParaTi() {
-  const biblioteca = leerBiblioteca();
+function obtenerParaTi(perfilId) {
+  const biblioteca = leerBiblioteca(perfilId);
   if (biblioteca.length === 0) {
     return { secciones: [] };
   }

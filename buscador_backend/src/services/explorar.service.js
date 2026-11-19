@@ -1,5 +1,6 @@
 const path = require('path');
 const Database = require('better-sqlite3');
+const { consultaVotos } = require('./calificaciones.service');
 
 const db = new Database(path.join(__dirname, '..', '..', 'books.db'));
 
@@ -18,10 +19,10 @@ function reconstruirResumen() {
     CREATE TEMP TABLE resumen_libros AS
     SELECT
       isbn,
-      SUM(CASE WHEN calificacion > 0 THEN 1 ELSE 0 END) AS votos,
-      AVG(CASE WHEN calificacion > 0 THEN calificacion END) AS promedio,
-      COUNT(*) AS lecturas
-    FROM calificaciones
+      COUNT(estrellas) AS votos,
+      AVG(estrellas) AS promedio,
+      SUM(lectura) AS lecturas
+    FROM (${consultaVotos()})
     GROUP BY isbn;
     CREATE INDEX temp.idx_resumen_isbn ON resumen_libros(isbn);
   `);
@@ -29,7 +30,7 @@ function reconstruirResumen() {
 
 function promedioGlobal() {
   const fila = db
-    .prepare('SELECT AVG(calificacion) AS promedio FROM calificaciones WHERE calificacion > 0')
+    .prepare(`SELECT AVG(estrellas) AS promedio FROM (${consultaVotos()})`)
     .get();
   return fila.promedio || 0;
 }
@@ -41,7 +42,7 @@ function formatear(fila) {
     autor: fila.autor,
     imagen: fila.imagen,
     categoria: fila.categoria,
-    promedio: fila.promedio === null ? null : Math.round((fila.promedio / 2) * 10) / 10,
+    promedio: fila.promedio === null ? null : Math.round(fila.promedio * 10) / 10,
     votos: fila.votos,
     lecturas: fila.lecturas
   };
