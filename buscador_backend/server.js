@@ -8,11 +8,15 @@ const explorarRoutes = require('./src/routes/explorar.routes')
 const authRoutes = require('./src/routes/auth.routes');
 const recomendacionesRoutes = require('./src/routes/recomendaciones.routes');
 
-const ORIGEN_FRONTEND = 'http://localhost:5173';
+const ORIGENES_PERMITIDOS = [
+  'http://localhost:5173',
+  'http://localhost:5174',
+  'http://localhost:5175'
+];
 
 const app = express();
 
-app.use(cors({ origin: ORIGEN_FRONTEND, credentials: true }));
+app.use(cors({ origin: ORIGENES_PERMITIDOS, credentials: true }));
 app.use(cookieParser());
 app.use(express.json());
 app.use('/', librosRoutes);

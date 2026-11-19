@@ -5,7 +5,7 @@ import PanelLibro from './PanelLibro';
 import './Calificaciones.css';
 import './Buscador.css';
 
-function ListaResultados({ resultados }) {
+function ListaResultados({ resultados, mostrarSimilitud = false }) {
   const [resumenes, setResumenes] = useState({});
   const [libroAbierto, setLibroAbierto] = useState(null);
 
@@ -57,6 +57,9 @@ function ListaResultados({ resultados }) {
                 {libro.titulo}
               </p>
               <p className="autor-fila">{libro.autor}</p>
+              {mostrarSimilitud && typeof libro.similitud === 'number' && (
+                <p className="similitud-fila">Similitud {libro.similitud.toFixed(3)}</p>
+              )}
               <div className="calificacion-tarjeta">
                 {resumen && resumen.total > 0 ? (
                   <>

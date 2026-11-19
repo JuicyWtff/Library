@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { obtenerExplorar, obtenerParaTi } from '../services/librosApi';
 import FilaLibros from './FilaLibros';
 import PanelLibro from './PanelLibro';
+import EsqueletoLibros from './EsqueletoLibros';
 import './Explorar.css';
 
 function Explorar() {
@@ -29,11 +30,19 @@ function Explorar() {
   }, []);
 
   if (cargando) {
-    return <p className="texto-calificacion">Cargando...</p>;
+    return <EsqueletoLibros cantidad={5} />;
   }
 
   if (error) {
-    return <p className="texto-calificacion">{error}</p>;
+    return <p className="mensaje-busqueda error">{error}. Recarga la página e inténtalo de nuevo.</p>;
+  }
+
+  if (secciones.length === 0) {
+    return (
+      <p className="mensaje-busqueda">
+        Aún no hay libros para mostrar. Usa el buscador o elige un género para empezar.
+      </p>
+    );
   }
 
   return (

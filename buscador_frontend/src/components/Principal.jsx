@@ -2,21 +2,28 @@ import { useRef, useState } from 'react';
 import Explorar from './Explorar';
 import Buscador from './Buscador';
 import ListaResultados from './ListaResultados';
+import EsqueletoLibros from './EsqueletoLibros';
 import Biblioteca from './Biblioteca';
 import Estadisticas from './Estadisticas';
 import CabeceraPerfil from './CabeceraPerfil';
-import { buscarLibros, buscarPorCategoria } from '../services/librosApi';
+import {
+  buscarLibros,
+  buscarPorRelevancia,
+  buscarPorCategoria
+} from '../services/librosApi';
 
 function Principal() {
   const [pestana, setPestana] = useState('explorar');
   const [texto, setTexto] = useState('');
   const [categoriaActiva, setCategoriaActiva] = useState(null);
+  const [modo, setModo] = useState('prefijo');
   const [resultados, setResultados] = useState([]);
   const [cargando, setCargando] = useState(false);
   const [error, setError] = useState('');
   const solicitud = useRef(0);
 
   const busquedaActiva = texto.trim() !== '' || categoriaActiva !== null;
+  const porRelevancia = modo === 'relevancia' && categoriaActiva === null;
 
   async function ejecutar(consulta) {
     solicitud.current += 1;
@@ -30,7 +37,7 @@ function Principal() {
     } catch {
       if (id !== solicitud.current) return;
       setResultados([]);
-      setError('No se pudo completar la búsqueda');
+      setError('No se pudo completar la búsqueda. Revisa que el servidor esté en marcha e inténtalo de nuevo.');
     }
     setCargando(false);
   }
@@ -39,6 +46,7 @@ function Principal() {
     solicitud.current += 1;
     setTexto('');
     setCategoriaActiva(null);
+    setModo('prefijo');
     setResultados([]);
     setCargando(false);
     setError('');
@@ -47,6 +55,7 @@ function Principal() {
   function cambiarTexto(valor) {
     setTexto(valor);
     setCategoriaActiva(null);
+    setModo('prefijo');
     if (valor.trim() === '') {
       limpiar();
       setTexto(valor);
@@ -55,12 +64,21 @@ function Principal() {
     ejecutar(() => buscarLibros(encodeURIComponent(valor)));
   }
 
+  function buscarConEnter() {
+    const consulta = texto.trim();
+    if (consulta === '') return;
+    setCategoriaActiva(null);
+    setModo('relevancia');
+    ejecutar(() => buscarPorRelevancia(encodeURIComponent(consulta)));
+  }
+
   function cambiarCategoria(categoria) {
     if (categoria === categoriaActiva) {
       limpiar();
       return;
     }
     setTexto('');
+    setModo('prefijo');
     setCategoriaActiva(categoria);
     ejecutar(() => buscarPorCategoria(encodeURIComponent(categoria)));
   }
@@ -76,6 +94,8 @@ function Principal() {
     { id: 'estadisticas', texto: 'Estadísticas' }
   ];
 
+  const sinResultados = !cargando && !error && resultados.length === 0;
+
   return (
     <div className="contenedor-principal">
       <CabeceraPerfil />
@@ -85,6 +105,7 @@ function Principal() {
         texto={texto}
         categoriaActiva={categoriaActiva}
         onTexto={cambiarTexto}
+        onBuscar={buscarConEnter}
         onCategoria={cambiarCategoria}
         onLimpiar={limpiar}
       />
@@ -102,22 +123,35 @@ function Principal() {
       </div>
 
       {busquedaActiva && (
-        <div>
-          <h2 className="encabezado-resultados">
-            {categoriaActiva ? categoriaActiva : `Resultados para “${texto.trim()}”`}{' '}
-            {!cargando && resultados.length > 0 && <span>({resultados.length})</span>}
-          </h2>
+        <section aria-live="polite">
+          <div className="cabecera-resultados">
+            <h2 className="encabezado-resultados">
+              {categoriaActiva ? categoriaActiva : `Resultados para “${texto.trim()}”`}{' '}
+              {!cargando && resultados.length > 0 && <span>({resultados.length})</span>}
+            </h2>
+            {!categoriaActiva && (
+              <p className={`modo-busqueda ${porRelevancia ? 'relevancia' : ''}`}>
+                {porRelevancia
+                  ? 'Ordenados por relevancia (similitud coseno)'
+                  : 'Coincidencias por prefijo. Presiona Enter para ordenarlas por relevancia.'}
+              </p>
+            )}
+          </div>
 
-          {cargando && resultados.length === 0 && (
-            <p className="mensaje-busqueda">Buscando...</p>
-          )}
-          {error && <p className="mensaje-busqueda">{error}</p>}
-          {!cargando && !error && resultados.length === 0 && (
-            <p className="mensaje-busqueda">No encontré libros con esa búsqueda.</p>
+          {cargando && resultados.length === 0 && <EsqueletoLibros cantidad={12} />}
+          {error && <p className="mensaje-busqueda error">{error}</p>}
+          {sinResultados && (
+            <p className="mensaje-busqueda">
+              {categoriaActiva
+                ? 'Todavía no hay libros en este género.'
+                : `No encontré libros para “${texto.trim()}”. Prueba con otra palabra del título o elige un género.`}
+            </p>
           )}
 
-          <ListaResultados resultados={resultados} />
-        </div>
+          <div className={cargando && resultados.length > 0 ? 'resultados-recargando' : ''}>
+            <ListaResultados resultados={resultados} mostrarSimilitud={porRelevancia} />
+          </div>
+        </section>
       )}
 
       <div hidden={busquedaActiva || pestana !== 'explorar'}>

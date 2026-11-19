@@ -52,6 +52,10 @@ async function buscarLibros(texto) {
   return pedir(`/buscar?q=${texto}`);
 }
 
+async function buscarPorRelevancia(texto) {
+  return pedir(`/buscar-relevancia?q=${texto}`);
+}
+
 async function buscarPorCategoria(categoria) {
   return pedir(`/categoria?nombre=${categoria}`);
 }
@@ -139,6 +143,7 @@ async function entrarAPerfil(id, pin) {
 export {
   registrarManejadorSesionVencida,
   buscarLibros,
+  buscarPorRelevancia,
   buscarPorCategoria,
   obtenerEstadisticas,
   obtenerResumenes,
